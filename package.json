@@ -1,0 +1,16 @@
+{
+    "name": "atw",
+    "version": "0.1.2",
+    "author": "BR",
+    "description": "Around The World : Carnet de voyage",
+    "dependencies": {
+        "body-parser": "^1.19.0",
+        "cookie-session": "^1.3.3",
+        "ejs": "^2.6.1",
+        "express": "^4.17.1",
+        "express-session": "^1.16.1",
+        "json": "^9.0.6",
+        "mysql": "^2.17.1",
+        "socket.io": "^2.2.0"
+    }
+}

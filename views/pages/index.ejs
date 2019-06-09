@@ -1,0 +1,12 @@
+<!DOCTYPE HTML>
+<html lang="fr">
+<%include ../include/head %>
+  
+<body>
+    <%if (page != '../pages/inscription' && page != '../pages/connexion') {%>
+        <%include ../include/header %>  
+    <%}%>
+    <h1><%= title %></h1>
+        <%- include(page);%>
+</body>
+</html>
