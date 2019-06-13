@@ -24,11 +24,13 @@ app.use(session({
     secret: 'atw session',
     resave: false,
     saveUninitialized: true
-}))
+}));
+
+app.use(express.static('scripts'));
 
 //----------------------------------------------------PAGES
 pages = pages.dataPages();
-
+app.use(express.static('public'));
 
 //----------------------------------------------------ENVIRONMENT
 app.set('view engine', 'ejs');
@@ -47,7 +49,7 @@ app.listen(28);
 app.get('/', function(req, res)
 {
     var user = req.session.user;
-    res.setHeader('Content-Type', 'text/html');
+    res.setHeader('Content-Type', 'text/javascript');
     if(!user)
     {
         res.redirect('/authentification');
@@ -97,10 +99,17 @@ app.get('/', function(req, res)
     res.render('pages/index', {title: pages['home'][0], page: pages['home'][1], user: req.session.user});
 })
 
+//---------------------------------------------------DECONNEXION
 .get('/deconnexion', function(req, res){
     req.session.destroy(function(err){
         res.redirect('/authentification');
     });
 })
 
-.get('/profil', model.profil);
+//---------------------------------------------------PROFIL
+.get('/profil', model.profil)
+
+//---------------------------------------------------MES PAYS
+.get('/mespays', function(req,res){
+    res.render('pages/index', {title: pages['mespays'][0], page: pages['mespays'][1]});
+});
