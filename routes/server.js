@@ -26,8 +26,6 @@ app.use(session({
     saveUninitialized: true
 }));
 
-app.use(express.static('scripts'));
-
 //----------------------------------------------------PAGES
 pages = pages.dataPages();
 app.use(express.static('public'));
@@ -112,4 +110,16 @@ app.get('/', function(req, res)
 //---------------------------------------------------MES PAYS
 .get('/mespays', function(req,res){
     res.render('pages/index', {title: pages['mespays'][0], page: pages['mespays'][1]});
-});
+})
+
+//---------------------------------------------------DECOUVERTE
+.get('/decouverte', function(req,res){
+    res.render('pages/index', {title: pages['decouverte'][0], page: pages['decouverte'][1]});
+})
+
+
+//---------------------------------------------------DESC PAYS
+.get('/decouverte/:pays', function(req,res){
+    res.render('pages/index', {title: req.params.pays, page: pages['descpays'][1], pays:req.params.pays});
+})
+
