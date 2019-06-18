@@ -11,6 +11,9 @@
 var express = require('express');
 var session = require('express-session');
 var bodyParser = require('body-parser');
+var path = require('path');
+var serveStatic = require('serve-static');
+var $ = require("jquery");
 var urlencodedParser = bodyParser.urlencoded({extended: false});
 var app = express();
 var model = require('../models/model');
@@ -18,6 +21,7 @@ var pages = require('../models/pages');
 
 //----------------------------------------------------MYSQL
 model.getDB();
+//model.getLangue();
 
 //----------------------------------------------------SESSION
 app.use(session({
@@ -29,6 +33,7 @@ app.use(session({
 //----------------------------------------------------PAGES
 pages = pages.dataPages();
 app.use(express.static('public'));
+app.use('/static', express.static(__dirname + '/public'));
 
 //----------------------------------------------------ENVIRONMENT
 app.set('view engine', 'ejs');
@@ -119,7 +124,5 @@ app.get('/', function(req, res)
 
 
 //---------------------------------------------------DESC PAYS
-.get('/decouverte/:pays', function(req,res){
-    res.render('pages/index', {title: req.params.pays, page: pages['descpays'][1], pays:req.params.pays});
-})
+.get('/decouverte/:pays', model.descpays);
 
