@@ -101,6 +101,14 @@ exports.connexion = function(req, res)
     });
 };
 
+/*
+profil
+----------------------------
+* User profil
+**********************
+* SELECT all user's information
+* Render with them
+*/
 exports.profil = function(req, res)
 {
     var pages = require('../models/pages');
@@ -113,4 +121,49 @@ exports.profil = function(req, res)
     {
         res.render('pages/index', {title: pages['profil'][0], page: pages['profil'][1], user: result[0].login, nbpv: result[0].nbPV, niveau: result[0].niveau});            
     });
+};
+
+/*
+descpays
+----------------------------
+* Description of the country
+**********************
+* SELECT all country's informations
+* Render with them (image, desc...)
+*/
+exports.descpays = function(req, res)
+{
+    var pages = require('../models/pages');
+    pages = pages.dataPages();    
+    var reqPays = "SELECT * FROM decouverte WHERE nom = '"+req.params.pays+"'";
+    
+    db.query(reqPays, function(err, result)
+    {
+        var flag = result[0].drapeau;
+        var map = result[0].carte;
+        var monument = result[0].monument;
+        var id = result[0].idPays;
+        res.render('pages/index', {title: req.params.pays, page: pages['descpays'][1], pays:req.params.pays, id:id, flag: flag, map: map, monument: monument});
+    });
+};
+
+exports.getLangue = function(req, res)
+{
+    var $ = require("jquery");
+    
+    $(document).ready(function(){
+        switchLang('FR');
+    });
+
+    $('.lng').click(function(){
+        switchLang($(this).attr('id'));
+    });    
+
+    function switchLang(lng)
+    {
+        var lng = lng;
+        var pays = $('#descpays').attr('data-lang');
+        var texte = langs[lng][pays];
+        $("#descpays").text(texte);    
+    };    
 };
