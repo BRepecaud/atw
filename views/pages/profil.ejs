@@ -1,7 +1,18 @@
 <div id="profil">
     <h2><%=user%></h2>
-    <ul>
-        <li>Nombre de pays visités: <%=nbpv%></li>
-        <li>Niveau: <%=niveau%></li>
-    </ul>
+    
+    <fieldset>
+        <select id="selectLang">
+            <option id="FR">Français</option>
+            <option id="EN">English</option>
+            <option id="ES">Espanol</option>
+            <option id="PR">Português</option>
+        </select>
+        <button id="updateLang" class="lang" data-lang="updateLang"></button>
+        <ul>
+            <li><span class="lang" data-lang="nbPays"></span>: <%=nbpv%></li>
+            <li><span class="lang" data-lang="lvl"></span>: <%=niveau%></li>
+        </ul>        
+    </fieldset>
+
 </div>
