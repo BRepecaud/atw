@@ -12,16 +12,21 @@ var express = require('express');
 var session = require('express-session');
 var bodyParser = require('body-parser');
 var path = require('path');
-var serveStatic = require('serve-static');
 var $ = require("jquery");
 var urlencodedParser = bodyParser.urlencoded({extended: false});
 var app = express();
+
+//------------------------------------Socket.io
+var server = require('http').Server(app);
+var io = require('socket.io')(server);
+
+
 var model = require('../models/model');
 var pages = require('../models/pages');
 
 //----------------------------------------------------MYSQL
 model.getDB();
-//model.getLangue();
+
 
 //----------------------------------------------------SESSION
 app.use(session({
@@ -37,7 +42,7 @@ app.use('/static', express.static(__dirname + '/public'));
 
 //----------------------------------------------------ENVIRONMENT
 app.set('view engine', 'ejs');
-app.listen(28);
+server.listen(28);
 
 /* 
  *****************************************************************************************
@@ -48,6 +53,36 @@ app.listen(28);
  *****************************************************************************************
  *****************************************************************************************
  */
+
+/*
+socket
+----------------------------
+* Get User Language (callback to return the lang)
+* Update User Language
+*/
+function socket(user)
+{
+    io.sockets.on('connection', function(socket){
+        if(user)
+        {
+            //------------------------------------------------getLang
+            model.getLang(user, function(err, res)
+            {
+                socket.on('loadLng', function(){
+                    var lang = res;
+                    socket.emit('reploadLng', lang);
+                });                 
+            });
+            
+            //------------------------------------------------updateLang
+            socket.on('updateLng', function(lng)
+            {
+                model.updateLang(user, lng);
+            });
+        }
+    }); 
+};
+
 //---------------------------------------------------RACINE
 app.get('/', function(req, res)
 {
@@ -74,7 +109,8 @@ app.get('/', function(req, res)
     }
     else
     {
-        res.render('pages/index', {title: pages['home'][0], page: pages['home'][1], user: req.session.user});
+        res.redirect('/accueil');
+        //res.render('pages/index', {title: pages['home'][0], page: pages['home'][1], user: req.session.user});
     }
 })
 
@@ -98,8 +134,10 @@ app.get('/', function(req, res)
 .post('/inscription', urlencodedParser, model.inscription)
 
 //---------------------------------------------------ACCUEIL
-.get('/accueil', function(req,res){
+.get('/accueil', function(req,res){ 
+    socket(req.session.user);
     res.render('pages/index', {title: pages['home'][0], page: pages['home'][1], user: req.session.user});
+    
 })
 
 //---------------------------------------------------DECONNEXION
@@ -122,7 +160,5 @@ app.get('/', function(req, res)
     res.render('pages/index', {title: pages['decouverte'][0], page: pages['decouverte'][1]});
 })
 
-
 //---------------------------------------------------DESC PAYS
-.get('/decouverte/:pays', model.descpays);
-
+.get('/decouverte/:pays', model.descpays)

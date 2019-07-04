@@ -12,7 +12,6 @@ exports.getDB = function()
         password: '',
         database: 'atw',
     });
-
     connection.connect();
     global.db = connection;    
 }
@@ -34,6 +33,7 @@ exports.inscription = function(req, res)
     var form = req.body;
     var login = form.login;
     var pwd = form.pwd;
+    var lng = 'FR';
     var pwd2 = form.pwd2;
     var niveau = 'débutant';
     var reqVerif = "SELECT * FROM utilisateur WHERE login = '"+ login + "'";
@@ -44,8 +44,8 @@ exports.inscription = function(req, res)
         //-------------------------------------Inscription OK
         if(result.length === 0 && pwd === pwd2)
         {
-            var reqInscription = "INSERT INTO utilisateur(login, pwd, nbPV, niveau) \n\
-            VALUES ('" + login + "','" + pwd + "','" + 0 + "','" + niveau + "')";
+            var reqInscription = "INSERT INTO utilisateur(login, pwd, lng, nbPV, niveau) \n\
+            VALUES ('" + login + "','" + pwd + "','" + lng + "','" + 0 + "','" + niveau + "')";
 
             db.query(reqInscription, function(err, result)
             {
@@ -92,7 +92,8 @@ exports.connexion = function(req, res)
             var session = req.session;
             
             req.session.user = result[0].login;
-            res.render('pages/index', {title: pages['home'][0], page: pages['home'][1], user: req.session.user});
+            res.redirect('/accueil');
+            //res.render('pages/index', {title: pages['home'][0], page: pages['home'][1], user: req.session.user});
         }
         else
         {
@@ -115,11 +116,11 @@ exports.profil = function(req, res)
     pages = pages.dataPages();
     
     var user = req.session.user;
-    var reqProfil = "SELECT login, nbPV, niveau FROM utilisateur WHERE login = '"+user+"'";
+    var reqProfil = "SELECT login, lng, nbPV, niveau FROM utilisateur WHERE login = '"+user+"'";
     
     db.query(reqProfil, function(err, result)
     {
-        res.render('pages/index', {title: pages['profil'][0], page: pages['profil'][1], user: result[0].login, nbpv: result[0].nbPV, niveau: result[0].niveau});            
+        res.render('pages/index', {title: pages['profil'][0], page: pages['profil'][1], user: result[0].login, lng: result[0].lng, nbpv: result[0].nbPV, niveau: result[0].niveau});            
     });
 };
 
@@ -147,23 +148,24 @@ exports.descpays = function(req, res)
     });
 };
 
-exports.getLangue = function(req, res)
+/*
+getLangue
+----------------------------
+* Get User Language
+**********************
+* callback to return the lang
+*/
+exports.getLang = function(user, callback)
 {
-    var $ = require("jquery");
-    
-    $(document).ready(function(){
-        switchLang('FR');
-    });
-
-    $('.lng').click(function(){
-        switchLang($(this).attr('id'));
-    });    
-
-    function switchLang(lng)
+    var reqLng = "SELECT lng FROM utilisateur WHERE login='"+user+"'";
+    db.query(reqLng, function(err, result)
     {
-        var lng = lng;
-        var pays = $('#descpays').attr('data-lang');
-        var texte = langs[lng][pays];
-        $("#descpays").text(texte);    
-    };    
+        callback(null, result[0].lng);
+    });       
+};
+
+exports.updateLang = function(user, lng)
+{
+    var reqUpdate = "UPDATE utilisateur SET lng = '"+lng+"' WHERE login = '"+user+"'";   
+    db.query(reqUpdate);
 };
