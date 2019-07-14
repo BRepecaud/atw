@@ -3,4 +3,29 @@
     <img width="5%" src = <%= monument%> />
     <img width="5%" src = <%= map%> />
     <div class="lang" id="descpays" data-lang=<%=id%>></div>
+    <div id="villes">
+        <ul>
+            <% villes.forEach(function(ville){ %>
+                <li><%=ville%></li>
+            <%});%>
+        </ul>
+    </div>
+    
+    <%if(!ok){%>
+        <button id="addPAV" class="lang" data-lang="addPAV"></button>
+        <button id="delPAV" class="lang" data-lang="delPAV"></button> 
+    <%}%>
+</div>    
+<div id="avis-internaute">
+    <h2 class="lang" data-lang="avisUser"></h2>
+    <h3><span class="lang" data-lang="moyenneUser"></span>: <%= moyenne%> / 5</h3>
+    <%for(var i=0; i<avis.length; i++){%>
+        <fieldset>
+            <legend><%= avis[i][0]%></legend>
+            <p><%= avis[i][1]%></p>
+            <p><%= avis[i][2]%> / 5</p>
+            <p><%= avis[i][3]%></p>
+        </fieldset>            
+    <%}%>
 </div>
+
