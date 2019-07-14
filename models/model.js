@@ -89,8 +89,7 @@ exports.connexion = function(req, res)
         //-------------------------------------Login exists
         if(result.length)
         {
-            var session = req.session;
-            
+            //var session = req.session;
             req.session.user = result[0].login;
             res.redirect('/accueil');
             //res.render('pages/index', {title: pages['home'][0], page: pages['home'][1], user: req.session.user});
@@ -124,32 +123,18 @@ exports.profil = function(req, res)
     });
 };
 
-/*
-descpays
-----------------------------
-* Description of the country
-**********************
-* SELECT all country's informations
-* Render with them (image, desc...)
-*/
-exports.descpays = function(req, res)
-{
-    var pages = require('../models/pages');
-    pages = pages.dataPages();    
-    var reqPays = "SELECT * FROM decouverte WHERE nom = '"+req.params.pays+"'";
-    
-    db.query(reqPays, function(err, result)
-    {
-        var flag = result[0].drapeau;
-        var map = result[0].carte;
-        var monument = result[0].monument;
-        var id = result[0].idPays;
-        res.render('pages/index', {title: req.params.pays, page: pages['descpays'][1], pays:req.params.pays, id:id, flag: flag, map: map, monument: monument});
-    });
-};
 
+/* 
+ *****************************************************************************************
+ *****************************************************************************************
+ *****************************************************************************************
+ ********************************LANGUE***************************************************
+ *****************************************************************************************
+ *****************************************************************************************
+ *****************************************************************************************
+ */
 /*
-getLangue
+getLang
 ----------------------------
 * Get User Language
 **********************
@@ -164,8 +149,268 @@ exports.getLang = function(user, callback)
     });       
 };
 
+/*
+updateLang
+----------------------------
+* Update User Language
+**********************
+*/
 exports.updateLang = function(user, lng)
 {
     var reqUpdate = "UPDATE utilisateur SET lng = '"+lng+"' WHERE login = '"+user+"'";   
     db.query(reqUpdate);
+};
+
+/* 
+ *****************************************************************************************
+ *****************************************************************************************
+ *****************************************************************************************
+ ********************************PAYS*****************************************************
+ *****************************************************************************************
+ *****************************************************************************************
+ *****************************************************************************************
+ */
+/*
+addPAV
+----------------------------
+* Add selected country to PAV
+**********************
+*/
+exports.addPAV = function(user, pays)
+{
+    var statut = 'à visiter';
+    var reqPAV = "INSERT INTO paysutilisateur(statut, login, idPays) \n\
+    VALUES ('" + statut + "','" + user + "','" + pays + "')";
+    db.query(reqPAV, function(err, result)
+    {
+        if(err)
+        {
+            console.log("PAV déjà ajouté");
+        }
+    });
+};
+
+/*
+delPAV
+----------------------------
+* Delete selected country to PAV
+**********************
+*/
+exports.delPAV = function(user, pays)
+{
+    var reqdelPAV = "DELETE FROM paysutilisateur WHERE idPays = '" + pays + "' AND login= '"+user+"'";
+    db.query(reqdelPAV, function(err, result)
+    {
+        if(err)
+        {
+            console.log("Impossible de le supprimer, PAV pas ajouté à votre liste");
+        }
+    });
+};
+
+/*
+getMesPays
+----------------------------
+* SELECT user countries + parse into json (used in jvectormap)
+**********************
+* JSON : 
+* * ',' if not the last 
+* * color pv / pav 
+*/
+exports.getMesPays = function(user, callback)
+{
+    var reqMesPays = "SELECT * FROM paysutilisateur WHERE login= '"+user+"'";
+    db.query(reqMesPays, function(err, result)
+    {
+        var mespays = '[';
+        var pv = '#48A90A';
+        var pav = '#FFD700';
+        var tab;
+        for(var i=0; i<result.length; i++)
+        {
+            var statut = result[i].statut;
+            var pays = result[i].idPays;
+            
+            if(statut === 'à visiter')
+            {
+                couleur = pav;
+            }
+            else
+            {
+                couleur = pv;
+            }
+
+            if(i === result.length - 1)
+            {
+                mespays += '{"'+pays+'":"'+couleur+'"}';
+            }
+            else
+            {
+                mespays += '{"'+pays+'":"'+couleur+'"},';
+            }
+        }
+        mespays += ']';
+        tab = JSON.parse(mespays);
+        callback(null, tab);
+    });
+};
+
+/*
+mespays
+----------------------------
+* Redirect to decouverte or sauvegarde or :pays
+**********************
+*/
+exports.mespays = function(req, res)
+{
+    var pages = require('../models/pages');
+    var user = req.session.user;
+    var id = req.params.idPays;
+    pages = pages.dataPages();    
+    
+    var reqMonPays = "SELECT * FROM paysutilisateur WHERE idPays = '"+id+"' AND login = '"+user+"'";   
+    var reqDescPays = "SELECT * FROM pays WHERE idPays = '"+id+"'";   
+    var reqAvis = "SELECT note, commentaire, statut, DATE_FORMAT(dateAvis, '%d/%m/%Y - %H:%i') AS date FROM avis WHERE login = '"+user+"' AND idPays = '"+id+"'"; 
+    
+    db.query(reqMonPays, function(err,result)
+    {
+        //-------------------------Rien: redirect decouverte
+        if(result.length === 0)
+        {
+            res.redirect('/decouverte/'+id);
+        }
+        else 
+        {
+            var statut = result[0].statut;
+            
+            db.query(reqDescPays, function(err, result)
+            {
+                var nom = result[0].nom;
+                var flag = result[0].drapeau;
+                
+                //-------------------------PAV
+                if(statut === 'à visiter')
+                {
+                    res.redirect('/mespays/'+id+'/sauvegarde');
+                }
+
+                //-------------------------PV
+                else if (statut === 'visité')
+                {
+                    db.query(reqAvis, function(err, result)
+                    {
+                        var commentaire = result[0].commentaire;
+                        var note = result[0].note;
+                        var date = result[0].date;
+                        res.render('pages/index', {title: nom, page: pages['pv'][1], pays:nom, id:req.params.idPays, flag: flag, com: commentaire, note:note, date:date});
+                    });
+                    
+                }
+            });
+
+        }
+    });
+    
+};
+
+/*
+sauvegardeAvis
+----------------------------
+* Sauvegarde page
+**********************
+* Avis display 
+*/
+exports.sauvegardeAvis = function(req, res)
+{
+    var pages = require('../models/pages'); 
+    var user = req.session.user;
+    var id = req.params.idPays;
+    var reqDescPays = "SELECT * FROM pays WHERE idPays = '"+id+"'";  
+    var reqAvis = "SELECT * FROM avis WHERE login = '"+user+"' AND idPays = '"+id+"'";
+    pages = pages.dataPages();    
+
+    db.query(reqAvis, function(err, result1)
+    {
+        db.query(reqDescPays, function(err, result)
+        {
+            var nom = result[0].nom;
+            var flag = result[0].drapeau;     
+            var securite = 0;     
+            var avis = '';
+            var note = 2;
+            if(result1.length !== 0)
+            {
+                securite = result1[0].statut;
+                note = result1[0].note;
+                avis = result1[0].commentaire;
+            }
+            //res.render('pages/index', {title: nom, page: pages['pav'][1], pays:nom, id:req.params.idPays, flag: flag});
+            res.render('pages/index', {title: nom, page: pages['pav'][1], pays:nom, id:req.params.idPays, flag: flag, note: note, avis: avis, statut:securite});                    
+        });        
+    });
+        
+};
+
+/*
+savePV
+----------------------------
+* INSERT / SAVE avis
+**********************
+* params: note, avis, securite, user, id
+*/
+exports.savePV = function(note, avis, securite, user, id)
+{
+    var statut = 'visité';
+    var reqSavePV = "INSERT INTO avis(dateAvis, note, commentaire, statut, login, idPays) \n\
+    VALUES (NOW(), '" + note + "','" + avis + "','" + securite +"','" + user +"','" + id + "')";
+
+    var reqUpdatePU = "UPDATE paysutilisateur\n\
+    SET statut = '" + statut +"' WHERE login = '" + user +"' AND idPays = '" + id + "'";
+    
+    var reqUpdatePV = "UPDATE avis \n\
+    SET dateAvis = NOW(), note = '" + note + "', commentaire = '" + avis + "', statut = '" + securite +"' WHERE login = '" + user +"' AND idPays = '" + id + "'";
+    
+    db.query(reqSavePV, function(err, result)
+    {
+        db.query(reqUpdatePU);
+        if(err)
+        {
+            db.query(reqUpdatePV);
+        }
+    });
+}
+
+/*
+descpays
+----------------------------
+* Description of the country
+**********************
+* SELECT all country's informations
+* Render with them (image, desc...)
+*/
+exports.descpays = function(req, res)
+{
+    var pages = require('../models/pages');
+    pages = pages.dataPages();    
+    var reqPays = "SELECT * FROM pays WHERE idPays = '"+req.params.idPays+"'";
+    
+    db.query(reqPays, function(err, result)
+    {
+        var flag = result[0].drapeau;
+        var map = result[0].carte;
+        var monument = result[0].monument;
+        var nom = result[0].nom;
+        
+        var reqVilles = "SELECT nom FROM ville WHERE idPays = '"+req.params.idPays+"'";
+        var tabVilles = new Array();
+        db.query(reqVilles, function(err, result)
+        {            
+            for(var i=0; i<result.length; i++)
+            {
+                tabVilles.push(result[i].nom);
+            }
+            res.render('pages/index', {title: nom, page: pages['descpays'][1], pays:nom, id:req.params.idPays, flag: flag, map: map, monument: monument, villes: tabVilles});
+        });
+        
+    });
 };

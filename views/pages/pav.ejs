@@ -1,0 +1,37 @@
+<div id=<%=id%> class="monpays">
+    <img width="5%" src = <%= flag%> />
+    <!--<div class="lang" id="descpays" data-lang=<%=id%>></div>-->
+    
+    <form>
+        <div id="radio">          
+            <input type="radio" name="pvpav" id="btnPV" checked> <span class="lang" data-lang="btnPV"></span>
+            <input type="radio" name="pvpav" id="btnPAV"> <span class="lang" data-lang="btnPAV"></span>
+        </div>
+        <div class="ajoutPV">
+            <fieldset>
+                <legend class="lang" data-lang="note"></legend>
+                 <% for(var i=0; i<6; i++){%>
+                    <%if((i) ===note){ %>
+                        <input type="radio" name="note" value="<%=note%>" checked> <%=note%>
+                    <%}else{%>
+                        <input type="radio" name="note" value="<%=i%>"><%=i%>
+                <%}}%>
+            </fieldset>
+            <fieldset>
+                <legend class="lang" data-lang="avis"></legend>
+                <textarea name="avis" rows="10" cols="30" id="avis-textarea"><%=avis%></textarea>
+            </fieldset>
+            <fieldset>
+                <%if (statut === 0) {%>
+                    <input type="radio" name="securite" value="0" checked>Privé
+                    <input type="radio" name="securite" value="1">Public             
+                <%}else{%>
+                    <input type="radio" name="securite" value="0">Privé
+                    <input type="radio" name="securite" value="1" checked>Public       
+                <%}%>
+            </fieldset>            
+                   
+        </div>
+    </form>
+    <button id="savePV" class="lang ajoutPV" data-lang="updateLang"></button>     
+</div>

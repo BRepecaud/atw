@@ -11,6 +11,7 @@ $(document).ready(function(){
     {
         switchLang(lng);
     });
+    ajoutPV();
     
 });
 
@@ -55,3 +56,67 @@ function switchLang(lng) //----------------------Modif BDD
         $(this).text(texte);            
     });
 };
+
+/*
+add/delPAV
+----------------------------
+**********************
+* emit country server has to add / delete from the user list
+*/
+//-------add
+$("#addPAV").click(function(){
+    var pays = $("#descpays").attr('data-lang');
+    socket.emit('newPAV', pays);
+});
+
+//-------del
+$("#delPAV").click(function(){
+    var pays = $("#descpays").attr('data-lang');
+    socket.emit('delPAV', pays);
+});
+
+/*
+deconnexion
+----------------------------
+**********************
+* inform user's disconnected, redirect to deconnexion's page
+*/
+$("#deco").click(function()
+{
+    socket.emit('deco');
+    window.location.href='/deconnexion';
+});
+
+function ajoutPV()
+{
+    var pv = $("#btnPV");
+    var pav = $("#btnPAV");
+    var blocVisite = $(".ajoutPV");
+    
+    if(pav.is(':checked'))
+    {
+        blocVisite.hide();
+    }
+    else if(pv.is(':checked'))
+    {
+        blocVisite.show();
+    }    
+}
+
+$(":radio[name=pvpav]").click(function()
+{
+    ajoutPV();
+});
+
+$("#savePV").click(function()
+{
+    var note = $(":radio[name=note]:checked").val();
+    var avis = $("#avis-textarea").val();
+    var securite = $(":radio[name=securite]:checked").val();
+    var id = $('.monpays').attr('id');
+    console.log(note);
+    console.log(avis);
+    console.log(id);
+    
+    socket.emit('savePV', note, avis, securite, id);
+});

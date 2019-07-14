@@ -62,8 +62,9 @@ socket
 */
 function socket(user)
 {
+    var user = user;
     io.sockets.on('connection', function(socket){
-        if(user)
+        if(user !== '.')
         {
             //------------------------------------------------getLang
             model.getLang(user, function(err, res)
@@ -78,6 +79,40 @@ function socket(user)
             socket.on('updateLng', function(lng)
             {
                 model.updateLang(user, lng);
+            });
+            
+            //------------------------------------------------newPAV
+            socket.on('newPAV', function(pays)
+            {
+                model.addPAV(user, pays);
+            });            
+
+            //------------------------------------------------delPAV
+            socket.on('delPAV', function(pays)
+            {
+                model.delPAV(user, pays);
+            });                    
+
+            //------------------------------------------------mesPAV
+            model.getMesPays(user, function(err, res)
+            {
+                socket.on('mesPays', function()
+                {
+                    var listePays = res;
+                    socket.emit('repMesPays', listePays);
+                });              
+            });
+          
+            //------------------------------------------------SavePV
+            socket.on('savePV', function(note, avis, securite, id)
+            {
+                model.savePV(note, avis, securite, user, id);
+            });
+
+            //------------------------------------------------Deconnexion
+            socket.on('deco', function()
+            {
+                user = '.';
             });
         }
     }); 
@@ -110,7 +145,6 @@ app.get('/', function(req, res)
     else
     {
         res.redirect('/accueil');
-        //res.render('pages/index', {title: pages['home'][0], page: pages['home'][1], user: req.session.user});
     }
 })
 
@@ -136,8 +170,7 @@ app.get('/', function(req, res)
 //---------------------------------------------------ACCUEIL
 .get('/accueil', function(req,res){ 
     socket(req.session.user);
-    res.render('pages/index', {title: pages['home'][0], page: pages['home'][1], user: req.session.user});
-    
+    res.render('pages/index', {title: pages['home'][0], page: pages['home'][1], user: req.session.user});  
 })
 
 //---------------------------------------------------DECONNEXION
@@ -145,6 +178,7 @@ app.get('/', function(req, res)
     req.session.destroy(function(err){
         res.redirect('/authentification');
     });
+    
 })
 
 //---------------------------------------------------PROFIL
@@ -152,8 +186,16 @@ app.get('/', function(req, res)
 
 //---------------------------------------------------MES PAYS
 .get('/mespays', function(req,res){
+    io.sockets.on('connection', function(socket){   
+        socket.emit('loadMesPays');
+    });
+    
     res.render('pages/index', {title: pages['mespays'][0], page: pages['mespays'][1]});
 })
+
+.get('/mespays/:idPays', model.mespays)
+
+.get('/mespays/:idPays/sauvegarde', model.sauvegardeAvis)
 
 //---------------------------------------------------DECOUVERTE
 .get('/decouverte', function(req,res){
@@ -161,4 +203,4 @@ app.get('/', function(req, res)
 })
 
 //---------------------------------------------------DESC PAYS
-.get('/decouverte/:pays', model.descpays)
+.get('/decouverte/:idPays', model.descpays);
