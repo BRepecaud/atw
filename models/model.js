@@ -360,6 +360,7 @@ savePV
 */
 exports.savePV = function(note, avis, securite, user, id)
 {
+    var model = require('../models/model');     
     var statut = 'visité';
     var reqSavePV = "INSERT INTO avis(dateAvis, note, commentaire, statut, login, idPays) \n\
     VALUES (NOW(), '" + note + "','" + avis + "','" + securite +"','" + user +"','" + id + "')";
@@ -372,13 +373,51 @@ exports.savePV = function(note, avis, securite, user, id)
     
     db.query(reqSavePV, function(err, result)
     {
-        db.query(reqUpdatePU);
         if(err)
         {
             db.query(reqUpdatePV);
         }
+        else
+        {
+            model.updateProfil(user);
+            db.query(reqUpdatePU);
+        }
     });
-}
+};
+
+/*
+updateProfil
+----------------------------
+* Lvl + nbPV update
+**********************
+*/
+exports.updateProfil = function(user)
+{   
+    var reqNiveau = "SELECT * FROM utilisateur WHERE login = '"+user+"'";
+    
+    db.query(reqNiveau, function(err, result)
+    {
+        var nbPV = result[0].nbPV;
+        
+        if(nbPV+1 < 3)
+        {
+            niveau = 'débutant';
+        }
+        else if(nbPV+1 >= 3 && nbPV+1 < 6)
+        {
+            niveau = 'intermédiaire';
+        }
+        else if(nbPV+1 >= 6)
+        {
+            niveau = 'expert';
+        }
+
+        var reqUpdateNbPV = "UPDATE utilisateur\n\
+        SET nbPV = nbPV+1, niveau = '"+niveau+"'WHERE login = '" + user +"'";        
+        
+        db.query(reqUpdateNbPV);
+    });
+};
 
 /*
 descpays
@@ -386,14 +425,18 @@ descpays
 * Description of the country
 **********************
 * SELECT all country's informations
+* + users' opinion
+* + average mark
 * Render with them (image, desc...)
 */
 exports.descpays = function(req, res)
 {
     var pages = require('../models/pages');
     pages = pages.dataPages();    
+    var user = req.session.user;
     var reqPays = "SELECT * FROM pays WHERE idPays = '"+req.params.idPays+"'";
-    
+    var reqAvisPays =  "SELECT login, note, commentaire, DATE_FORMAT(dateAvis, '%d/%m/%Y - %H:%i') AS date FROM avis WHERE statut = 1 AND idPays = '"+req.params.idPays+"' ORDER BY date DESC";
+    var reqMoyennePays =  "SELECT AVG(note) AS moyenne FROM avis WHERE statut = 1 AND idPays = '"+req.params.idPays+"'";
     db.query(reqPays, function(err, result)
     {
         var flag = result[0].drapeau;
@@ -403,13 +446,44 @@ exports.descpays = function(req, res)
         
         var reqVilles = "SELECT nom FROM ville WHERE idPays = '"+req.params.idPays+"'";
         var tabVilles = new Array();
+        var tabAvis = new Array();
+        
         db.query(reqVilles, function(err, result)
         {            
             for(var i=0; i<result.length; i++)
             {
                 tabVilles.push(result[i].nom);
             }
-            res.render('pages/index', {title: nom, page: pages['descpays'][1], pays:nom, id:req.params.idPays, flag: flag, map: map, monument: monument, villes: tabVilles});
+            db.query(reqAvisPays, function(err, result)
+            {
+                if(!err)
+                {
+                    for(var i=0; i<result.length; i++)
+                    {
+                        var login = result[i].login;
+                        var date = result[i].date;
+                        var note = result[i].note;
+                        var commentaire = result[i].commentaire;
+                        
+                        tabAvis[i] = [login, date, note, commentaire];
+                    }
+                    db.query(reqMoyennePays, function(err, result)
+                    {
+                        var moyenne = result[0].moyenne;
+                        var ok = false;
+                        
+                        for(var i=0; i<tabAvis.length; i++)
+                        {
+                            var login = tabAvis[i][0];
+                            if(user === login)
+                            {
+                                ok = true;
+                            }
+                        }
+                        res.render('pages/index', {title: nom, page: pages['descpays'][1], pays:nom, id:req.params.idPays, flag: flag, map: map, monument: monument, villes: tabVilles, avis: tabAvis, moyenne:moyenne, ok:ok});
+                    });                    
+                }
+            });
         });
         
     });
