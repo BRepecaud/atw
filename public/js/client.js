@@ -1,5 +1,5 @@
 var socket = io.connect('http://localhost:28');
-
+//var socketAccueil = io.connect('http://localhost:28/accueil');
 /*
 * Ask the server to return the user language
 * Once it's done: switchLang
@@ -23,6 +23,7 @@ updateLng
 */
 //-----------------------------------Click
 $('.lng').click(function(){
+    console.log('yo');
     var lang = $(this).attr('id');
     switchLang(lang);
     socket.emit('updateLng', lang);
@@ -75,18 +76,13 @@ $("#delPAV").click(function(){
     socket.emit('delPAV', pays);
 });
 
+
 /*
-deconnexion
+ajoutPV
 ----------------------------
 **********************
-* inform user's disconnected, redirect to deconnexion's page
+* Hide/show opinion form
 */
-$("#deco").click(function()
-{
-    socket.emit('deco');
-    window.location.href='/deconnexion';
-});
-
 function ajoutPV()
 {
     var pv = $("#btnPV");
@@ -108,15 +104,17 @@ $(":radio[name=pvpav]").click(function()
     ajoutPV();
 });
 
+/*
+savePV
+----------------------------
+**********************
+* Emit user's opinion to save it
+*/
 $("#savePV").click(function()
 {
     var note = $(":radio[name=note]:checked").val();
     var avis = $("#avis-textarea").val();
     var securite = $(":radio[name=securite]:checked").val();
-    var id = $('.monpays').attr('id');
-    console.log(note);
-    console.log(avis);
-    console.log(id);
-    
+    var id = $('.monpays').attr('id');    
     socket.emit('savePV', note, avis, securite, id);
 });
