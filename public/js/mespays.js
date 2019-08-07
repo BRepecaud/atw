@@ -14,16 +14,17 @@ socketMesPays.on('repMesPays', function(listePays)
         map:'world_mill_fr',
         regionsSelectable: true,
         container: $('#mespays'),
+        backgroundColor: '#d5d5bd',
         //-----------------------------Style country selected
         regionStyle: 
         {
             initial: 
             {
-                fill: '#ffffff'
+                fill: '#2b1b15'
             },
             selected: 
             {
-                fill: '#ffffff'
+                fill: '#2b1b15'
             }
         },            
         series: {

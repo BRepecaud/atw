@@ -4,7 +4,8 @@ var socket = io.connect('http://localhost:28');
 * Ask the server to return the user language
 * Once it's done: switchLang
 */
-$(document).ready(function(){
+$(document).ready(function()
+{
     socket.emit('loadLng');
     
     socket.on('reploadLng', function(lng)
@@ -13,6 +14,12 @@ $(document).ready(function(){
     });
     ajoutPV();
     
+    socket.on('menuActif', function(liActif)
+    {
+        $(".actif").toggleClass("actif");
+        $(liActif).toggleClass("actif");  
+        console.log(liActif);
+    });
 });
 
 /*
@@ -22,7 +29,8 @@ updateLng
 * Click or change on select option = switch + update
 */
 //-----------------------------------Click
-$('.lng').click(function(){
+$('.lng').click(function()
+{
     console.log('yo');
     var lang = $(this).attr('id');
     switchLang(lang);
@@ -115,6 +123,12 @@ $("#savePV").click(function()
     var note = $(":radio[name=note]:checked").val();
     var avis = $("#avis-textarea").val();
     var securite = $(":radio[name=securite]:checked").val();
-    var id = $('.monpays').attr('id');    
+    //var id = $('.monpays').attr('id');    
+    var id = $('form').attr('class');    
     socket.emit('savePV', note, avis, securite, id);
+});
+
+$("#menu li").click(function()
+{
+    socket.emit('menuActif', $(this));
 });

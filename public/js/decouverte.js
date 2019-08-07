@@ -1,27 +1,27 @@
 $(function(){
-    $("#world").vectorMap({
+    var map = new jvm.Map({
         map:'world_mill_fr',
         regionsSelectable: true,
-        
+        container: $('#decouverte'),
+        backgroundColor: '#d5d5bd',
         //-----------------------------Style country selected
         regionStyle: 
         {
             initial: 
             {
-                fill: '#ffffff'
+                fill: '#2b1b15'
             },
             selected: 
             {
-                fill: '#ffffff'
+                fill: '#2b1b15'
             }
         },
         
         //-----------------------------Country selected: redirection to the desc page
         onRegionSelected: function(event, code)
         {
-            var map = $("#world").vectorMap('get', 'mapObject');
-            var nom = map.getRegionName(code);
-            console.log(nom);
+            var map = $("#decouverte").vectorMap('get', 'mapObject');
+            var nom = map.getSelectedRegions(code);
             window.location.href='/decouverte/'+nom;
         },
         
