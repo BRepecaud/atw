@@ -1,0 +1,15 @@
+<div class="drapeau">
+    <img width="5%" src = <%= flag%> />
+</div>
+
+<div id="avis-internaute-all">
+    <%for(var i=0; i<avis.length; i++){%>
+        <fieldset class="avis fieldset-avis">
+            <legend><%= avis[i][0]%></legend>
+            <p class="date"><%= avis[i][1]%></p>
+            <p class="note"><%= avis[i][2]%> / 5</p>
+            <p class="p-avis"><%= avis[i][3]%></p>
+        </fieldset>            
+    <%}%>
+</div>
+

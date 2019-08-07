@@ -1,37 +1,61 @@
-<div id=<%=id%> class="monpays">
-    <img width="5%" src = <%= flag%> />
+<!--<div id=<%=id%> class="monpays">-->
+    <div class="drapeau">
+        <img width="5%" src = <%= flag%> />        
+    </div>
+    
     <!--<div class="lang" id="descpays" data-lang=<%=id%>></div>-->
     
-    <form>
-        <div id="radio">          
-            <input type="radio" name="pvpav" id="btnPV" checked> <span class="lang" data-lang="btnPV"></span>
-            <input type="radio" name="pvpav" id="btnPAV"> <span class="lang" data-lang="btnPAV"></span>
+    <form id="modif-avis" class=<%=id%>>
+        <div class="radio">   
+            <div class="radio-binaire">
+                <input type="radio" name="pvpav" id="btnPV" checked> <span class="lang" data-lang="btnPV"></span>
+            </div>
+            <div class="radio-binaire">
+                <input type="radio" name="pvpav" id="btnPAV"> <span class="lang" data-lang="btnPAV"></span>
+            </div>
         </div>
         <div class="ajoutPV">
             <fieldset>
                 <legend class="lang" data-lang="note"></legend>
-                 <% for(var i=0; i<6; i++){%>
-                    <%if((i) ===note){ %>
-                        <input type="radio" name="note" value="<%=note%>" checked> <%=note%>
-                    <%}else{%>
-                        <input type="radio" name="note" value="<%=i%>"><%=i%>
-                <%}}%>
+                <div class="radio">
+                    <% for(var i=0; i<6; i++){%>
+                       <%if((i) ===note){ %>
+                           <div class="radio-note">
+                               <input type="radio" name="note" value="<%=note%>" checked> <span><%=note%></span>
+                           </div> 
+                       <%}else{%>
+                           <div class="radio-note">
+                               <input type="radio" name="note" value="<%=i%>"><span><%=i%></span>
+                           </div>
+                   <%}}%>
+                </div>
             </fieldset>
             <fieldset>
                 <legend class="lang" data-lang="avis"></legend>
-                <textarea name="avis" rows="10" cols="30" id="avis-textarea"><%=avis%></textarea>
+                <textarea name="avis" rows="auto" cols="auto" id="avis-textarea"><%=avis%></textarea>
             </fieldset>
             <fieldset>
-                <%if (statut === 0) {%>
-                    <input type="radio" name="securite" value="0" checked>Privé
-                    <input type="radio" name="securite" value="1">Public             
-                <%}else{%>
-                    <input type="radio" name="securite" value="0">Privé
-                    <input type="radio" name="securite" value="1" checked>Public       
-                <%}%>
+                <legend class="lang" data-lang="statut"></legend>
+                <div class="radio">
+                    <%if (statut === 0) {%>
+                        <div class="radio-binaire">
+                            <input type="radio" name="securite" value="0" checked><span class="lang" data-lang="prive"></span>
+                        </div>
+                        <div class="radio-binaire">
+                            <input type="radio" name="securite" value="1"><span class="lang" data-lang="public"></span>             
+                        </div>
+                    <%}else{%>
+                        <div class="radio-binaire">
+                            <input type="radio" name="securite" value="1" checked><span class="lang" data-lang="public"></span>       
+                        </div>                            
+                        <div class="radio-binaire">
+                            <input type="radio" name="securite" value="0"><span class="lang" data-lang="prive"></span>
+                        </div>
+                    <%}%>
+                </div>
             </fieldset>            
                    
         </div>
     </form>
     <button id="savePV" class="lang ajoutPV" data-lang="updateLang"></button>     
-</div>
+<!--</div>-->

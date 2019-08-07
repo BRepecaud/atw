@@ -3,14 +3,33 @@
 <%include ../include/head %>
   
 <body>
-    <%if (page != '../pages/inscription' && page != '../pages/connexion') {%>
-        <%include ../include/header %>  
-    <%}%>
-    <h1><%= title %></h1>
-        <%- include(page);%>
-        
+    <div class="container">
+        <%if (page != '../pages/inscription' && page != '../pages/connexion') {%>
+            <%include ../include/menu %>              
+            <div id="logo-header">
+                <img src="/images/items/atw_logo.png">                
+            </div>
+            <div id="langues">
+                <button class="lng" id="FR"><img src="/images/items/fr.png"></button>
+                <button class="lng"  id="EN"><img src="/images/items/uk.png"></button>
+                <button class="lng"  id="ES"><img src="/images/items/esp.png"></button>
+                <button class="lng"  id="PR"><img src="/images/items/por.png"></button>               
+            </div>            
+        <%}%>
+ 
+        <h1 data-lang=<%= datalang %> class="lang"><%= title %></h1>
 
+        <%- include(page);%>  
+
+        <div id="boussole">
+            <div id="cercle">
+                <span id="aiguille"></span>
+            </div>
+        </div>
+    </div>
+    
     <script src="/js/client.js"></script>
+    <script src="/js/boussole.js"></script>
     <script src="/js/jvectormap/jquery-jvectormap-2.0.3.min.js"></script>
     <script src="/js/jvectormap/jquery-jvectormap-world-mill-en.js"></script>
     <script src="/js/jvectormap/jquery-jvectormap-world-mill-fr.js"></script>        

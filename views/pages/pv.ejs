@@ -1,13 +1,14 @@
-<div id="pays">
-    <img width="5%" src = <%= flag%> />
-    <div id="div-avis">
-        <fieldset>
-            <legend class="lang" data-lang="monAvis"></legend>
-            <h3><%=date%></h3>
-            <h3><%=note%> / 5 </h3>            
-            <p><%= com%></p>
-        </fieldset>
-    </div>
-    
-    <button id="updatePV"> <a href="/mespays/<%=id%>/sauvegarde" class="lang" data-lang="updatePV"></a></button>
+<div class="drapeau">
+    <img width="5%" src = <%= flag%> />        
 </div>
+
+<div id="div-avis">
+    <fieldset class="fieldset-avis">
+        <legend class="lang" data-lang="monAvis"></legend>
+        <p class="date"><%=date%></p>
+        <p class="note"><%=note%> / 5 </p>            
+        <p class="p-avis"><%= com%></p>
+    </fieldset>
+</div>
+
+<button id="updatePV"> <a href="/mespays/<%=id%>/sauvegarde" class="lang" data-lang="updatePV"></a></button>

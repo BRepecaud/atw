@@ -1,7 +1,11 @@
-<div id="profil">
-    <h2><%=user%></h2>
+
+    <div id="user">
+        <img class="icon" src="/images/items/login1.png">
+        <h2><%=user%></h2>
+    </div>
     
-    <fieldset>
+    
+    <fieldset id="data-user">
         <select id="selectLang">
             <option id="FR">Français</option>
             <option id="EN">English</option>
@@ -10,9 +14,7 @@
         </select>
         <button id="updateLang" class="lang" data-lang="updateLang"></button>
         <ul>
-            <li><span class="lang" data-lang="nbPays"></span>: <%=nbpv%></li>
-            <li><span class="lang" data-lang="lvl"></span>: <%=niveau%></li>
+            <li>x <span class="lang" data-lang="nbPays"></span>: <b class="data-profil"><%=nbpv%></b></li>
+            <li>x <span class="lang" data-lang="lvl"></span>: <b class="data-profil"><%=niveau%></b></li>
         </ul>        
     </fieldset>
-
-</div>
