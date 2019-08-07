@@ -49,18 +49,18 @@ exports.inscription = function(req, res)
 
             db.query(reqInscription, function(err, result)
             {
-               res.render('pages/index', {title: pages['authentification'][0], page: pages['authentification'][1], message: "Inscription ok"});
+               res.render('pages/index', {title: pages['authentification'][0], page: pages['authentification'][1], datalang: pages['authentification'][2], message: "Inscription ok"});
             });            
         }
         //-------------------------------------PWD !=
         else if(pwd !== pwd2)
         {
-            res.render('pages/index', {title: pages['inscription'][0], page: pages['inscription'][1], message: "Inscription impossible, mots de passe différents"});
+            res.render('pages/index', {title: pages['inscription'][0], page: pages['inscription'][1], datalang: pages['inscription'][2], message: "Inscription impossible, mots de passe différents"});
         }
         //-------------------------------------LOGIN EXISTS
         else if(result.length)
         {
-            res.render('pages/index', {title: pages['inscription'][0], page: pages['inscription'][1], message: "Inscription impossible, login déjà utilisé"});
+            res.render('pages/index', {title: pages['inscription'][0], page: pages['inscription'][1], datalang: pages['inscription'][2], message: "Inscription impossible, login déjà utilisé"});
         }
     });
 };
@@ -96,7 +96,7 @@ exports.connexion = function(req, res)
         }
         else
         {
-            res.render('pages/index', {title: pages['authentification'][0], page: pages['authentification'][1], message: "Mauvais login ou mot de passe"});            
+            res.render('pages/index', {title: pages['authentification'][0], page: pages['authentification'][1], datalang: pages['authentification'][2], message: "Mauvais login ou mot de passe"});            
         }
     });
 };
@@ -119,7 +119,7 @@ exports.profil = function(req, res)
     
     db.query(reqProfil, function(err, result)
     {
-        res.render('pages/index', {title: pages['profil'][0], page: pages['profil'][1], user: result[0].login, lng: result[0].lng, nbpv: result[0].nbPV, niveau: result[0].niveau});            
+        res.render('pages/index', {title: pages['profil'][0], page: pages['profil'][1], datalang: pages['profil'][2], user: result[0].login, lng: result[0].lng, nbpv: result[0].nbPV, niveau: result[0].niveau});            
     });
 };
 
@@ -302,7 +302,7 @@ exports.mespays = function(req, res)
                         var commentaire = result[0].commentaire;
                         var note = result[0].note;
                         var date = result[0].date;
-                        res.render('pages/index', {title: nom, page: pages['pv'][1], pays:nom, id:req.params.idPays, flag: flag, com: commentaire, note:note, date:date});
+                        res.render('pages/index', {title: nom, page: pages['pv'][1], datalang: nom, pays:nom, id:req.params.idPays, flag: flag, com: commentaire, note:note, date:date});
                     });
                     
                 }
@@ -344,8 +344,7 @@ exports.sauvegardeAvis = function(req, res)
                 note = result1[0].note;
                 avis = result1[0].commentaire;
             }
-            //res.render('pages/index', {title: nom, page: pages['pav'][1], pays:nom, id:req.params.idPays, flag: flag});
-            res.render('pages/index', {title: nom, page: pages['pav'][1], pays:nom, id:req.params.idPays, flag: flag, note: note, avis: avis, statut:securite});                    
+            res.render('pages/index', {title: nom, page: pages['pav'][1], datalang: nom, pays:nom, id:req.params.idPays, flag: flag, note: note, avis: avis, statut:securite});                    
         });        
     });
         
@@ -435,56 +434,84 @@ exports.descpays = function(req, res)
     pages = pages.dataPages();    
     var user = req.session.user;
     var reqPays = "SELECT * FROM pays WHERE idPays = '"+req.params.idPays+"'";
-    var reqAvisPays =  "SELECT login, note, commentaire, DATE_FORMAT(dateAvis, '%d/%m/%Y - %H:%i') AS date FROM avis WHERE statut = 1 AND idPays = '"+req.params.idPays+"' ORDER BY date DESC";
+    var reqAvisPays =  "SELECT login, note, commentaire, DATE_FORMAT(dateAvis, '%d/%m/%Y - %H:%i') AS date FROM avis WHERE statut = 1 AND idPays = '"+req.params.idPays+"' ORDER BY date";
     var reqMoyennePays =  "SELECT AVG(note) AS moyenne FROM avis WHERE statut = 1 AND idPays = '"+req.params.idPays+"'";
+    
     db.query(reqPays, function(err, result)
     {
         var flag = result[0].drapeau;
         var map = result[0].carte;
         var monument = result[0].monument;
         var nom = result[0].nom;
-        
-        var reqVilles = "SELECT nom FROM ville WHERE idPays = '"+req.params.idPays+"'";
-        var tabVilles = new Array();
+        var nomMonument = result[0].nomMonument;
         var tabAvis = new Array();
         
-        db.query(reqVilles, function(err, result)
-        {            
+        db.query(reqAvisPays, function(err, result)
+        {
+            if(!err)
+            {
+                for(var i=0; i<result.length; i++)
+                {
+                    var login = result[i].login;
+                    var date = result[i].date;
+                    var note = result[i].note;
+                    var commentaire = result[i].commentaire;
+
+                    tabAvis[i] = [login, date, note, commentaire];
+                }
+                db.query(reqMoyennePays, function(err, result)
+                {
+                    var moyenne = result[0].moyenne;
+                    var ok = false;
+
+                    for(var i=0; i<tabAvis.length; i++)
+                    {
+                        var login = tabAvis[i][0];
+                        if(user === login)
+                        {
+                            ok = true;
+                        }
+                    }
+                    res.render('pages/index', {title: nom, page: pages['descpays'][1], datalang: nom, pays:nom, id:req.params.idPays, flag: flag, map: map, monument: monument, nomMonument: nomMonument, avis: tabAvis, moyenne:moyenne, ok:ok});
+                });                    
+            }
+        });
+    });
+};
+
+/*
+avispays
+----------------------------
+* User's opinion
+**********************
+* SELECT all users' opinion
+* Render Avispays' page
+*/
+exports.avispays = function(req, res)
+{
+    var pages = require('../models/pages');
+    pages = pages.dataPages(); 
+    
+    var reqPays = "SELECT * FROM pays WHERE idPays = '"+req.params.idPays+"'";
+    var reqAvisPays =  "SELECT login, note, commentaire, DATE_FORMAT(dateAvis, '%d/%m/%Y - %H:%i') AS date FROM avis WHERE statut = 1 AND idPays = '"+req.params.idPays+"' ORDER BY date";
+    var tabAvis = new Array();    
+    
+    db.query(reqPays, function(err,result)
+    {
+        var flag = result[0].drapeau;
+        var nom = result[0].nom;
+        
+        db.query(reqAvisPays, function(err,result)
+        {
             for(var i=0; i<result.length; i++)
             {
-                tabVilles.push(result[i].nom);
+                var login = result[i].login;
+                var date = result[i].date;
+                var note = result[i].note;
+                var commentaire = result[i].commentaire;
+                tabAvis[i] = [login, date, note, commentaire];
             }
-            db.query(reqAvisPays, function(err, result)
-            {
-                if(!err)
-                {
-                    for(var i=0; i<result.length; i++)
-                    {
-                        var login = result[i].login;
-                        var date = result[i].date;
-                        var note = result[i].note;
-                        var commentaire = result[i].commentaire;
-                        
-                        tabAvis[i] = [login, date, note, commentaire];
-                    }
-                    db.query(reqMoyennePays, function(err, result)
-                    {
-                        var moyenne = result[0].moyenne;
-                        var ok = false;
-                        
-                        for(var i=0; i<tabAvis.length; i++)
-                        {
-                            var login = tabAvis[i][0];
-                            if(user === login)
-                            {
-                                ok = true;
-                            }
-                        }
-                        res.render('pages/index', {title: nom, page: pages['descpays'][1], pays:nom, id:req.params.idPays, flag: flag, map: map, monument: monument, villes: tabVilles, avis: tabAvis, moyenne:moyenne, ok:ok});
-                    });                    
-                }
-            });
-        });
-        
+            res.render('pages/index', {title: nom, page: pages['avis'][1], datalang: nom, pays:nom, id:req.params.idPays, flag: flag, avis: tabAvis});
+        });        
     });
 };
