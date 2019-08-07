@@ -10,6 +10,7 @@
 
 var express = require('express');
 var session = require('express-session');
+
 var bodyParser = require('body-parser');
 var path = require('path');
 var $ = require("jquery");
@@ -20,20 +21,25 @@ var app = express();
 var server = require('http').Server(app);
 var io = require('socket.io')(server);
 
-
 var model = require('../models/model');
 var pages = require('../models/pages');
 
 //----------------------------------------------------MYSQL
 model.getDB();
 
-
 //----------------------------------------------------SESSION
-app.use(session({
+var socketMiddleware = session({
     secret: 'atw session',
     resave: false,
     saveUninitialized: true
-}));
+});
+
+io.use(function(socket, next)
+{
+    socketMiddleware(socket.request, socket.request.res, next);
+});
+app.use(socketMiddleware);
+
 
 //----------------------------------------------------PAGES
 pages = pages.dataPages();
@@ -48,80 +54,95 @@ server.listen(28);
  *****************************************************************************************
  *****************************************************************************************
  *****************************************************************************************
- ********************************ROUTES***************************************************
+ ********************************SOCKET***************************************************
  *****************************************************************************************
  *****************************************************************************************
  *****************************************************************************************
  */
 
 /*
-socket
+Connection
 ----------------------------
-* Get User Language (callback to return the lang)
-* Update User Language
+* Language
+* Add/del/save PV PAV
 */
-function socket(user)
-{
-    var user = user;
-    io.sockets.on('connection', function(socket){
-        if(user !== '.')
+io.sockets.on('connection', function(socket){             
+    var user = socket.request.session.user;
+    if(user)
+    {
+        //------------------------------------------------getLang
+        model.getLang(user, function(err, res)
         {
-            //------------------------------------------------getLang
-            model.getLang(user, function(err, res)
-            {
-                socket.on('loadLng', function(){
-                    var lang = res;
-                    socket.emit('reploadLng', lang);
-                });                 
-            });
-            
-            //------------------------------------------------updateLang
-            socket.on('updateLng', function(lng)
-            {
-                model.updateLang(user, lng);
-            });
-            
-            //------------------------------------------------newPAV
-            socket.on('newPAV', function(pays)
-            {
-                model.addPAV(user, pays);
-            });            
+            socket.on('loadLng', function(){
+                var lang = res;
+                socket.emit('reploadLng', lang);
+            });                 
+        });
 
-            //------------------------------------------------delPAV
-            socket.on('delPAV', function(pays)
-            {
-                model.delPAV(user, pays);
-            });                    
+        //------------------------------------------------updateLang
+        socket.on('updateLng', function(lng)
+        {
+            model.updateLang(user, lng);
+        });
 
-            //------------------------------------------------mesPAV
-            model.getMesPays(user, function(err, res)
-            {
-                socket.on('mesPays', function()
-                {
-                    var listePays = res;
-                    socket.emit('repMesPays', listePays);
-                });              
-            });
-          
-            //------------------------------------------------SavePV
-            socket.on('savePV', function(note, avis, securite, id)
-            {
-                model.savePV(note, avis, securite, user, id);
-            });
+        //------------------------------------------------newPAV
+        socket.on('newPAV', function(pays)
+        {
+            model.addPAV(user, pays);
+        });            
 
-            //------------------------------------------------Deconnexion
-            socket.on('deco', function()
-            {
-                user = '.';
-            });
-        }
-    }); 
-};
+        //------------------------------------------------delPAV
+        socket.on('delPAV', function(pays)
+        {
+            model.delPAV(user, pays);
+        });                    
 
+        //------------------------------------------------SavePV
+        socket.on('savePV', function(note, avis, securite, id)
+        {
+            model.savePV(note, avis, securite, user, id);
+        });    
+        
+        //------------------------------------------------menuActif
+        socket.on('menuActif', function(liActif){
+            socket.emit('menuActif', liActif);
+        });
+    }
+}); 
+
+/*
+Mes Pays
+----------------------------
+* User countries loading
+*/
+io.of("/mespays").on('connection', function (socket) {
+    var user = socket.request.session.user;
+   //------------------------------------------------mesPAV
+    if(user)
+    {
+        model.getMesPays(user, function(err, res)
+        {
+            var listePays = res;
+            socket.emit('repMesPays', listePays);     
+        });              
+    }
+
+});       
+
+/* 
+ *****************************************************************************************
+ *****************************************************************************************
+ *****************************************************************************************
+ ********************************ROUTES***************************************************
+ *****************************************************************************************
+ *****************************************************************************************
+ *****************************************************************************************
+ */
 //---------------------------------------------------RACINE
 app.get('/', function(req, res)
 {
     var user = req.session.user;
+    
     res.setHeader('Content-Type', 'text/javascript');
     if(!user)
     {
@@ -129,7 +150,8 @@ app.get('/', function(req, res)
     }
     else
     {
-        res.render('pages/index', {title: pages['home'][0], page: pages['home'][1], user: req.session.user});
+        var user = req.session.user;
+        res.render('pages/index', {title: pages['home'][0], page: pages['home'][1], datalang: pages['home'][2], user: user});
     }
 })
 
@@ -140,7 +162,7 @@ app.get('/', function(req, res)
     var user = req.session.user;
     if(!user)
     {
-        res.render('pages/index', {title: pages['authentification'][0], page: pages['authentification'][1], message: message});
+        res.render('pages/index', {title: pages['authentification'][0], page: pages['authentification'][1], datalang: pages['authentification'][2], message: message});
     }
     else
     {
@@ -157,11 +179,11 @@ app.get('/', function(req, res)
     var user = req.session.user;
     if(!user)
     {
-        res.render('pages/index', {title: pages['inscription'][0], page: pages['inscription'][1], message: message});
+        res.render('pages/index', {title: pages['inscription'][0], page: pages['inscription'][1], datalang: pages['inscription'][2], message: message});
     }
     else
     {
-        res.render('pages/index', {title: pages['home'][0], page: pages['home'][1], user: req.session.user});
+        res.render('pages/index', {title: pages['home'][0], page: pages['home'][1], datalang: pages['home'][2], user: req.session.user});
     }      
 })
 
@@ -169,38 +191,33 @@ app.get('/', function(req, res)
 
 //---------------------------------------------------ACCUEIL
 .get('/accueil', function(req,res){ 
-    socket(req.session.user);
-    res.render('pages/index', {title: pages['home'][0], page: pages['home'][1], user: req.session.user});  
+    res.render('pages/index', {title: pages['home'][0], page: pages['home'][1], datalang: pages['home'][2], user: req.session.user});  
 })
 
 //---------------------------------------------------DECONNEXION
 .get('/deconnexion', function(req, res){
     req.session.destroy(function(err){
         res.redirect('/authentification');
-    });
-    
+    }); 
 })
 
 //---------------------------------------------------PROFIL
 .get('/profil', model.profil)
 
 //---------------------------------------------------MES PAYS
-.get('/mespays', function(req,res){
-    io.sockets.on('connection', function(socket){   
-        socket.emit('loadMesPays');
-    });
-    
-    res.render('pages/index', {title: pages['mespays'][0], page: pages['mespays'][1]});
+.get('/mespays', function(req,res){  
+    res.render('pages/index', {title: pages['mespays'][0], page: pages['mespays'][1], datalang: pages['mespays'][2],});
 })
 
 .get('/mespays/:idPays', model.mespays)
-
 .get('/mespays/:idPays/sauvegarde', model.sauvegardeAvis)
 
 //---------------------------------------------------DECOUVERTE
 .get('/decouverte', function(req,res){
-    res.render('pages/index', {title: pages['decouverte'][0], page: pages['decouverte'][1]});
+    res.render('pages/index', {title: pages['decouverte'][0], page: pages['decouverte'][1], datalang: pages['decouverte'][2],});
 })
 
 //---------------------------------------------------DESC PAYS
-.get('/decouverte/:idPays', model.descpays);
+.get('/decouverte/:idPays', model.descpays)
+
+.get('/decouverte/:idPays/avis', model.avispays);
