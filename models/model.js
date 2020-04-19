@@ -302,7 +302,7 @@ exports.mespays = function(req, res)
                         var commentaire = result[0].commentaire;
                         var note = result[0].note;
                         var date = result[0].date;
-                        res.render('pages/index', {title: nom, page: pages['pv'][1], datalang: nom, pays:nom, id:req.params.idPays, flag: flag, com: commentaire, note:note, date:date});
+                        res.render('pages/index', {title: nom, page: pages['pv'][1], datalang: req.params.idPays, pays:nom, id:req.params.idPays, flag: flag, com: commentaire, note:note, date:date});
                     });
                     
                 }
@@ -344,7 +344,7 @@ exports.sauvegardeAvis = function(req, res)
                 note = result1[0].note;
                 avis = result1[0].commentaire;
             }
-            res.render('pages/index', {title: nom, page: pages['pav'][1], datalang: nom, pays:nom, id:req.params.idPays, flag: flag, note: note, avis: avis, statut:securite});                    
+            res.render('pages/index', {title: nom, page: pages['pav'][1], datalang: req.params.idPays, pays:nom, id:req.params.idPays, flag: flag, note: note, avis: avis, statut:securite});                    
         });        
     });
         
@@ -472,7 +472,7 @@ exports.descpays = function(req, res)
                             ok = true;
                         }
                     }
-                    res.render('pages/index', {title: nom, page: pages['descpays'][1], datalang: nom, pays:nom, id:req.params.idPays, flag: flag, map: map, monument: monument, nomMonument: nomMonument, avis: tabAvis, moyenne:moyenne, ok:ok});
+                    res.render('pages/index', {title: nom, page: pages['descpays'][1], datalang: req.params.idPays, pays:nom, id:req.params.idPays, flag: flag, map: map, monument: monument, nomMonument: nomMonument, avis: tabAvis, moyenne:moyenne, ok:ok});
                 });                    
             }
         });
@@ -511,7 +511,7 @@ exports.avispays = function(req, res)
                 var commentaire = result[i].commentaire;
                 tabAvis[i] = [login, date, note, commentaire];
             }
-            res.render('pages/index', {title: nom, page: pages['avis'][1], datalang: nom, pays:nom, id:req.params.idPays, flag: flag, avis: tabAvis});
+            res.render('pages/index', {title: nom, page: pages['avis'][1], datalang: req.params.idPays, pays:nom, id:req.params.idPays, flag: flag, avis: tabAvis});
         });        
     });
 };
