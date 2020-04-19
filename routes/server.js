@@ -206,7 +206,7 @@ app.get('/', function(req, res)
 
 //---------------------------------------------------MES PAYS
 .get('/mespays', function(req,res){  
-    res.render('pages/index', {title: pages['mespays'][0], page: pages['mespays'][1], datalang: pages['mespays'][2],});
+    res.render('pages/index', {title: pages['mespays'][0], page: pages['mespays'][1], datalang: pages['mespays'][2]});
 })
 
 .get('/mespays/:idPays', model.mespays)
@@ -214,7 +214,7 @@ app.get('/', function(req, res)
 
 //---------------------------------------------------DECOUVERTE
 .get('/decouverte', function(req,res){
-    res.render('pages/index', {title: pages['decouverte'][0], page: pages['decouverte'][1], datalang: pages['decouverte'][2],});
+    res.render('pages/index', {title: pages['decouverte'][0], page: pages['decouverte'][1], datalang: pages['decouverte'][2]});
 })
 
 //---------------------------------------------------DESC PAYS
