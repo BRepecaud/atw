@@ -143,7 +143,7 @@ input[type='submit'], button
 
 #descpays
 {
-    font-size: 2vw;
+    font-size: 1.5vw;
 }
 
 h3, .avisUser
@@ -275,6 +275,11 @@ h1
     grid-column: 3;
 }
 
+#accueil-texte p
+{
+    font-size: 1.5vw;
+}
+
 /*-------------------------------------------------------------------MES PAYS*/
 #mespays, #decouverte
 {
@@ -329,6 +334,17 @@ textarea
 }
 
 /*-------------------------------------------------------------------DESCPAYS*/
+#descpays
+{
+    height:100%;
+}
+
+.col
+{
+    width:50%;
+    float:left;
+}
+
 .div-descpays
 {
     grid-column: 3;
