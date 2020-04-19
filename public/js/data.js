@@ -4,6 +4,7 @@ var langs =
     {
         //---------------------------Titres
         welcome: "Around The World, Mon Carnet de Voyage",
+        atwdesc: "ATW, c\'est la plateforme parfaite pour répertorier tous tes voyages effectués sur la planète Terre. Un pays te tente ? La rubrique \'Découverte\' est faite pour toi ! Tu en connaîtras plus sur la destination grâce à une rapide description et aux avis des autres voyageurs !",
      
         //---------------------------Menu
         home: "Accueil",
@@ -33,15 +34,16 @@ var langs =
         voirtout: 'Voir tout',
         statut: 'Statut',
         
-        //---------------------------Pays
-        BR: "Le Brésil est le plus grand Etat d'Amérique Latine.",
-        MX: "Le Mexique est connu pour son héritage inca."
+        //---------------------------Pays        
+        MX: 'Mexico',
+        BR:'Brésil'
     },
     
     EN:
     {
         //---------------------------Titres
         welcome: "Around The World, My Travel Diary",
+        atwdesc: "With ATW, you can save all you travels done on Earth. New country on your mind ? \'Discovery\' page is what you were looking for ! You\'ll know better the destination with a quick description and users\' opinion !",
 
         //---------------------------Menu
         home: "Home",
@@ -71,15 +73,16 @@ var langs =
         voirtout: 'See all',
         statut: 'Status',
         
-        //---------------------------Pays
-        BR: "Brazil is the greatest State of South America.",
-        MX: "Mexico is known for its inca's legacy."
+        //---------------------------Pays        
+        MX: 'Mexico',
+        BR:'Brésil'
     },
     
     ES:
     {
         //---------------------------Titres
         welcome: "Around The World, Mi Diario de Viaje",
+        atwdesc: "ATW es perfecto para añadir todos tus viajes hechos en la Tierra. Nuevo país en tu cabeza ? La pagina \'Descobierta\' puede ayudar. Con una rapida explicación del país y opiniones de los otros utilisadores, conocerás mejor tu futura destinación !",
         
         //---------------------------Menu
         home: "Home",
@@ -108,16 +111,13 @@ var langs =
         prive: 'Privado',
         voirtout: 'Ver todo',
         statut: 'Estatus',
-        
-        //---------------------------Pays
-        BR: "Brasil es el mas grande Estado de América Latina.",
-        MX: "Mexico está conocido por su herancia inca."
     },
     
     PR:
     {
         //---------------------------Titres
         welcome: "Around The World, o Meu Diario de Viagem",
+        atwdesc: "ATW é perfeito para adicionar todos os seus viagens feitos na Terra. Um novo país atrae você ? A pagina \'Descoberta\' pode ajudar. Com uma rapida explicação do país y opiniões dos otros utilisadores, conocera melhor sua futura destinação !",
         
         //---------------------------Menu
         home: "Home",
@@ -146,9 +146,5 @@ var langs =
         prive: 'Privado',
         voirtout: 'Ver tudo',
         statut: 'Estatuto',
-        
-        //---------------------------Pays
-        BR: "O Brasil é o maior Estado de America Latina.",
-        MX: "Mexico está conhecido pela sua herança inca."
     }
 };

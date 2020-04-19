@@ -31,7 +31,6 @@ updateLng
 //-----------------------------------Click
 $('.lng').click(function()
 {
-    console.log('yo');
     var lang = $(this).attr('id');
     switchLang(lang);
     socket.emit('updateLng', lang);
@@ -61,8 +60,22 @@ function switchLang(lng) //----------------------Modif BDD
     $(".lang").each(function()
     {
         var key = $(this).attr('data-lang');
-        var texte = langs[lng][key];
-        $(this).text(texte);            
+        var texte;
+        
+        if($(this).attr('id') === 'descpays')
+        {
+            texte = pays[lng][key];
+            var results = JSON.stringify(texte);
+            var results2 = results.replace(/\\n/g, "<br>").replace(/aaa/g, "<div class='col'>").replace(/bbb/g, "</div>").replace(/"/g, "&nbsp");
+            $(this).append(results2);            
+        }
+        else
+        {
+            texte = langs[lng][key];
+            $(this).text(texte); 
+        }
+        
+                   
     });
 };
 
